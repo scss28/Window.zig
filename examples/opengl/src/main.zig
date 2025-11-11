@@ -21,7 +21,8 @@ pub fn main() !void {
                 gl.Viewport(0, 0, size.width, size.height);
             },
             .key_down => |key| {
-                if (key == .f11) window.toggleFullscreen();
+                _ = key;
+                // if (key == .f11) window.toggleFullscreen();
             },
             else => {},
         };

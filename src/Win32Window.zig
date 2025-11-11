@@ -2,6 +2,12 @@ const std = @import("std");
 const enums = std.enums;
 const mem = std.mem;
 
+const common = @import("common.zig");
+pub const InitOptions = common.InitOptions;
+pub const MouseButton = common.MouseButton;
+pub const Key = common.Key;
+pub const Event = common.Event;
+
 const assert = std.debug.assert;
 
 const win32 = @import("win32.zig");
@@ -17,30 +23,6 @@ cursor_visible: bool = true,
 fullscreen: bool = false,
 old_style: win32.WINDOW_STYLE = undefined,
 old_placement: win32.WINDOWPLACEMENT = undefined,
-
-pub const InitOptions = struct {
-    name: [:0]const u8 = "Window",
-    width: u16 = 640,
-    height: u16 = 360,
-
-    surface: union(enum) {
-        none,
-        opengl: struct {
-            major: u8,
-            minor: u8,
-
-            pub const @"4.5": @This() = .{
-                .major = 4,
-                .minor = 5,
-            };
-
-            pub const @"3.2": @This() = .{
-                .major = 3,
-                .minor = 2,
-            };
-        },
-    } = .none,
-};
 
 pub fn init(options: InitOptions) !Window {
     const h_instance = win32.GetModuleHandleA(null);
@@ -205,148 +187,6 @@ pub fn toggleCursor(w: *Window) void {
 }
 
 var current_event: ?Event = null;
-
-pub const MouseButton = enum { left, middle, right };
-pub const Key = enum(u16) {
-    backspace = 0x08,
-    tab = 0x09,
-    enter = 0x0D,
-    pause = 0x13,
-    caps_lock = 0x14,
-    escape = 0x1B,
-    space = 0x20,
-    page_up = 0x21,
-    page_down = 0x22,
-    end = 0x23,
-    home = 0x24,
-    left = 0x25,
-    up = 0x26,
-    right = 0x27,
-    down = 0x28,
-    print_screen = 0x2C,
-    insert = 0x2D,
-    delete = 0x2E,
-
-    @"0" = 0x30,
-    @"1" = 0x31,
-    @"2" = 0x32,
-    @"3" = 0x33,
-    @"4" = 0x34,
-    @"5" = 0x35,
-    @"6" = 0x36,
-    @"7" = 0x37,
-    @"8" = 0x38,
-    @"9" = 0x39,
-
-    a = 0x41,
-    b = 0x42,
-    c = 0x43,
-    d = 0x44,
-    e = 0x45,
-    f = 0x46,
-    g = 0x47,
-    h = 0x48,
-    i = 0x49,
-    j = 0x4A,
-    k = 0x4B,
-    l = 0x4C,
-    m = 0x4D,
-    n = 0x4E,
-    o = 0x4F,
-    p = 0x50,
-    q = 0x51,
-    r = 0x52,
-    s = 0x53,
-    t = 0x54,
-    u = 0x55,
-    v = 0x56,
-    w = 0x57,
-    x = 0x58,
-    y = 0x59,
-    z = 0x5A,
-
-    left_super = 0x5B,
-    right_super = 0x5C,
-    menu = 0x5D,
-
-    kp_0 = 0x60,
-    kp_1 = 0x61,
-    kp_2 = 0x62,
-    kp_3 = 0x63,
-    kp_4 = 0x64,
-    kp_5 = 0x65,
-    kp_6 = 0x66,
-    kp_7 = 0x67,
-    kp_8 = 0x68,
-    kp_9 = 0x69,
-    kp_multiply = 0x6A,
-    kp_add = 0x6B,
-    kp_subtract = 0x6D,
-    kp_decimal = 0x6E,
-    kp_divide = 0x6F,
-
-    f1 = 0x70,
-    f2 = 0x71,
-    f3 = 0x72,
-    f4 = 0x73,
-    f5 = 0x74,
-    f6 = 0x75,
-    f7 = 0x76,
-    f8 = 0x77,
-    f9 = 0x78,
-    f10 = 0x79,
-    f11 = 0x7A,
-    f12 = 0x7B,
-    f13 = 0x7C,
-    f14 = 0x7D,
-    f15 = 0x7E,
-    f16 = 0x7F,
-    f17 = 0x80,
-    f18 = 0x81,
-    f19 = 0x82,
-    f20 = 0x83,
-    f21 = 0x84,
-    f22 = 0x85,
-    f23 = 0x86,
-    f24 = 0x87,
-
-    num_lock = 0x90,
-    scroll_lock = 0x91,
-
-    semicolon = 0xBA,
-    equals = 0xBB,
-    comma = 0xBC,
-    minus = 0xBD,
-    period = 0xBE,
-    slash = 0xBF,
-    grave_accent = 0xC0,
-    left_bracket = 0xDB,
-    backslash = 0xDC,
-    right_bracket = 0xDD,
-    apostrophe = 0xDE,
-
-    left_shift = 0xA0,
-    right_shift = 0xA1,
-    left_control = 0xA2,
-    right_control = 0xA3,
-    left_alt = 0xA4,
-    right_alt = 0xA5,
-};
-
-pub const Event = union(enum) {
-    resize: struct { width: u16, height: u16 },
-    close,
-    kill,
-
-    mouse_move: struct { x: u16, y: u16 },
-    mouse_scroll: i16,
-    mouse_down: MouseButton,
-    mouse_up: MouseButton,
-
-    key_down: Key,
-    key_up: Key,
-};
-
 pub fn nextEvent(_: *const Window) ?Event {
     var msg: win32.MSG = undefined;
     if (win32.PeekMessageA(&msg, null, 0, 0, .remove) == 0) return null;

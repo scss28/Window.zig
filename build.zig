@@ -8,8 +8,17 @@ pub fn build(b: *std.Build) void {
         else => @panic("unsupported"),
     };
 
-    _ = b.addModule("Window", .{
+    const mod = b.addModule("Window", .{
         .root_source_file = root,
         .target = target,
     });
+
+    switch (target.result.os.tag) {
+        .linux => {
+            mod.linkSystemLibrary("xcb", .{});
+            mod.linkSystemLibrary("egl", .{});
+            mod.link_libc = true;
+        },
+        else => {},
+    }
 }
