@@ -99,7 +99,6 @@ pub fn init(options: InitOptions) !Win32Window {
     return .{
         .hwnd = hwnd,
         .hdc = hdc,
-        .active_wsi = .gl,
     };
 }
 
@@ -156,15 +155,11 @@ pub fn exitFullscreen(w: *Win32Window) void {
 }
 
 pub inline fn showCursor(_: *Win32Window) void {
-    _ = win32.ShowCursor(1);
+    while (win32.ShowCursor(1) < 0) {}
 }
 
 pub inline fn hideCursor(_: *Win32Window) void {
-    _ = win32.ShowCursor(0);
-}
-
-pub fn toggleCursor(w: *Win32Window) void {
-    if (w.cursor_visible) w.hideCursor() else w.showCursor();
+    while (win32.ShowCursor(0) >= 0) {}
 }
 
 var current_event: ?Event = null;
@@ -190,20 +185,16 @@ pub fn glSwapBuffers(w: *const Win32Window) void {
 }
 
 pub fn glGetProcAddress(name: ?[*:0]const u8) ?*const fn () callconv(.c) void {
-    return win32.wglGetProcAddress(name) orelse win32.GetProcAddress(
-        win32.GetModuleHandleA("opengl32.dll"),
-        name,
-    );
+    if (win32.wglGetProcAddress(name)) |ptr| return @ptrCast(ptr);
+    return @ptrCast(win32.GetProcAddress(win32.GetModuleHandleA("opengl32.dll"), name));
 }
 
 pub inline fn glLoader() struct {
     opengl_instance: ?win32.HINSTANCE,
 
     pub fn getProcAddress(l: @This(), name: [*:0]const u8) ?*const fn () callconv(.c) void {
-        return win32.wglGetProcAddress(name) orelse win32.GetProcAddress(
-            l.opengl_instance,
-            name,
-        );
+        if (win32.wglGetProcAddress(name)) |ptr| return @ptrCast(ptr);
+        return @ptrCast(win32.GetProcAddress(l.opengl_instance, name));
     }
 } {
     return .{ .opengl_instance = win32.GetModuleHandleA("opengl32.dll") };

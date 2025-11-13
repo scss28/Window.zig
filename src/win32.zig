@@ -700,6 +700,7 @@ pub extern "kernel32" fn GetProcAddress(
 
 pub extern "gdi32" fn SwapBuffers(param0: ?HDC) callconv(.winapi) BOOL;
 pub extern "user32" fn ShowCursor(bShow: BOOL) c_int;
+pub extern "user32" fn SetCursor(hCursor: ?HCURSOR) HCURSOR;
 
 pub const HMONITOR = *opaque {};
 

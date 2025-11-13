@@ -350,7 +350,13 @@ pub fn hideCursor(w: *Window) void {
 }
 
 pub fn toggleCursor(w: *Window) void {
-    if (w.cursor_visible) w.hideCursor() else w.showCursor();
+    if (w.cursor_visible) {
+        w.impl.hideCursor();
+        w.cursor_visible = false;
+    } else {
+        w.showCursor();
+        w.cursor_visible = true;
+    }
 }
 
 /// Asserts the window was initialized with OpenGL.

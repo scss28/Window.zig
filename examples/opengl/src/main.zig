@@ -20,8 +20,8 @@ pub fn main() !void {
             },
             .key_down => |key| switch (key) {
                 .f11 => window.toggleFullscreen(),
-                .f10 => window.toggleCursor(),
-                else => {},
+                .f12 => window.toggleCursor(),
+                else => std.debug.print("{t}", .{key}),
             },
             else => {},
         };
